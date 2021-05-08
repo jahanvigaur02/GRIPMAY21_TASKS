@@ -1,0 +1,199 @@
+# Task 2 : Prediction Using Unsupervised Machine Learning
+
+##  Problem Statement : 
+### From the given ‘Iris’ dataset, Predict the optimum number of clusters and represent it visually.
+
+* Algorithm Type: Unsupervised Machine Learning 
+* Language: Use Python for performing this task
+* Algorithm Used: Clustering
+
+
+
+#Importing Libraries
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+sns.set()
+%matplotlib inline 
+import matplotlib.pyplot as plt
+
+# Read Iris Dataset
+
+Iris_set = pd.read_csv(r'C:\Users\DELL\Desktop\Iris.csv')
+Iris_set
+
+# First 5 Rows of Dataset
+
+Iris_set.head()
+
+# Drop Id Column as there is No use it.
+
+Iris_set.drop('Id',axis=1,inplace=True)
+
+#Dataset Description
+#Pandas describe():
+##is used to view some basic statistical details like percentile, mean, std etc. of a data frame or a series of numeric values.
+
+Iris_set.describe()
+
+# Checking the Null values
+
+Iris_set.info()
+
+# Compute pairwise correlation of columns, excluding NA/null values.
+
+Iris_set.corr()
+
+# Data Distributed In Target column
+
+pd.crosstab(index=Iris_set['Species'],columns='count').reset_index()
+
+# Let's Visualize the Target Column 
+sns.set_style("whitegrid")
+sns.pairplot(hue='Species', data=Iris_set,palette='Set2',height=3)
+plt.show()
+
+# Index values
+
+Iris_set.columns
+
+# Only take the Independent variables
+
+Features= Iris_set[['SepalLengthCm', 'SepalWidthCm', 'PetalLengthCm', 'PetalWidthCm']]
+
+# Import Library for K-means Algorithm
+
+from sklearn.cluster import KMeans
+
+#using Elbow rule for this
+
+within_cluster_sum_of_square=[]
+for k in range(1,11):
+    k_means=KMeans(n_clusters=k)
+    k_means.fit(Features)
+    within_cluster_sum_of_square.append(k_means.inertia_)
+    
+plt.plot(range(1,11),within_cluster_sum_of_square)
+plt.title('The Elbow Method',fontsize=18)
+plt.xlabel('Number of Cluster',fontsize=15)
+plt.ylabel('Within_Cluster_Sum_of_Square',fontsize=15)
+plt.show()
+
+plt.figure(figsize=(24,4))
+
+plt.suptitle("K-Means Clustering\n", fontsize=20)
+
+plt.subplot(1,5,1)
+plt.title('K= 1',fontsize=15)
+plt.xlabel('PetalLengthCm',fontsize=15)
+plt.ylabel('PetalWidthCm',fontsize=15)
+plt.scatter(Features.PetalLengthCm,Features.PetalWidthCm)
+
+plt.subplot(1,5,2)
+plt.title('K= 2',fontsize=15)
+plt.xlabel('PetalLengthCm',fontsize=15)
+k_means= KMeans(n_clusters=2)
+Features['labels']=k_means.fit_predict(Features)
+plt.scatter(Features.PetalLengthCm[Features.labels==0],Features.PetalWidthCm[Features.labels==0])
+plt.scatter(Features.PetalLengthCm[Features.labels==1],Features.PetalWidthCm[Features.labels==1])
+
+
+# Drop the labels because we only needs features
+Features.drop("labels",axis=1,inplace=True)
+
+plt.subplot(1,5,4)
+plt.title('K= 3',fontsize=15)
+plt.xlabel('PetalLengthCm',fontsize=15)
+k_means= KMeans(n_clusters=3)
+Features['labels']=k_means.fit_predict(Features)
+plt.scatter(Features.PetalLengthCm[Features.labels==0],Features.PetalWidthCm[Features.labels==0])
+plt.scatter(Features.PetalLengthCm[Features.labels==1],Features.PetalWidthCm[Features.labels==1])
+plt.scatter(Features.PetalLengthCm[Features.labels==2],Features.PetalWidthCm[Features.labels==2])
+
+
+
+# Drop the labels because we only needs features
+Features.drop("labels",axis=1,inplace=True)
+
+plt.subplot(1,5,3)
+plt.title('K= 4',fontsize=14)
+plt.xlabel('PetalLengthCm',fontsize=15)
+k_means= KMeans(n_clusters=3)
+Features['labels']=k_means.fit_predict(Features)
+plt.scatter(Features.PetalLengthCm[Features.labels==0],Features.PetalWidthCm[Features.labels==0])
+plt.scatter(Features.PetalLengthCm[Features.labels==1],Features.PetalWidthCm[Features.labels==1])
+plt.scatter(Features.PetalLengthCm[Features.labels==2],Features.PetalWidthCm[Features.labels==2])
+plt.scatter(Features.PetalLengthCm[Features.labels==3],Features.PetalWidthCm[Features.labels==3])
+
+
+# Drop the labels because we only needs features
+Features.drop("labels",axis=1,inplace=True)
+
+plt.subplot(1,5,5)
+plt.title('Original Labels',fontsize=18)
+plt.xlabel('PetalLengthCm',fontsize=15)
+
+plt.scatter(Iris_set.PetalLengthCm[Iris_set.Species=='Iris-setosa'],Iris_set.PetalWidthCm[Iris_set.Species=='Iris-setosa'])
+plt.scatter(Features.PetalLengthCm[Iris_set.Species=='Iris-versicolor'],Features.PetalWidthCm[Iris_set.Species=='Iris-versicolor'])
+plt.scatter(Features.PetalLengthCm[Iris_set.Species=='Iris-virginica'],Features.PetalWidthCm[Iris_set.Species=='Iris-virginica'])
+
+plt.subplots_adjust(top=0.7)
+plt.show()
+
+# implementing Hierarchical clustering
+
+from sklearn.cluster import AgglomerativeClustering
+
+cluster=AgglomerativeClustering(n_clusters=99)
+
+#As, we don't know how many clusters are present so we take as 99
+
+#finding best value of cluster
+
+import scipy.cluster.hierarchy as sch
+
+plt.figure(figsize=(11,7))
+dendogram=sch.dendrogram(sch.linkage(Features,method='ward'))
+plt.title('Dendrogram',fontsize=18)
+plt.xlabel('Features',fontsize=15)
+plt.ylabel('Euclidin Distance',fontsize=15)
+plt.show()
+
+## Evaluting the result and compare
+
+#k-means
+kmeans= KMeans(n_clusters=3)
+kmeans_predict = kmeans.fit_predict(Features)
+## cross tabulation table for k-means
+DataFrame1= pd.DataFrame({"labels":kmeans_predict,"Species":Iris_set['Species']})
+crt1=pd.crosstab(DataFrame1['labels'],DataFrame1['Species'])
+
+#Hierarchical clustering
+hr_cls= AgglomerativeClustering(n_clusters=3)
+hr_predict =hr_cls.fit_predict(Features)
+## cross tabulation table for k-means
+DataFrame2= pd.DataFrame({"labels":hr_predict,"Species":Iris_set['Species']})
+crt2=pd.crosstab(DataFrame2['labels'],DataFrame2['Species'])
+
+# visualize the result
+plt.figure(figsize=(11,6))
+plt.suptitle("Cross Tabulation",fontsize=20)
+plt.subplot(1,2,1)
+plt.title('K-Means',fontsize=18)
+sns.heatmap(crt1,annot=True,cbar=False,cmap='Greens')
+
+plt.subplot(1,2,2)
+plt.title('Hierarchical Clustering',fontsize=18)
+sns.heatmap(crt2,annot=True,cbar=False,cmap='Greens')
+
+
+
+plt.show()
+
+# OBSERVATION
+#### 1. the overall accuracy of both the models is approximate 90%.they both failed at the 6th data point out of 150 data points
+#### 2. clustering Iris -Setosa was very easy as it was very different from other two.
+#### 3. clustering Iris- Virginica was difficult for the model , 15 mistakes is coming out from the model .
+
+
